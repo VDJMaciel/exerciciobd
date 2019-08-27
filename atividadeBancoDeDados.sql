@@ -1,88 +1,96 @@
+drop database if exists atividadebd;
 create database if not exists atividadebd;
 use atividadebd;
 -- ---------------------------------------------------------
 -- DDL: 1- Criação das tabelas com suas chaves primarias
 
 create table departamento (
-	cod_departamento int primary key,
-	descricao varchar(30)
-);
+	cod_departamento int,
+	descricao varchar(30),
+    constraint pkdepartamento primary key (cod_departamento)
+) engine = innodb;
 
 create table funcionario (
-	cod_funcionario int primary key auto_increment,
+	cod_funcionario int auto_increment, 
     nome varchar(30),
+    constraint pkfuncionario primary key (cod_funcionario),
     -- será foreign key:
     cod_departamento int
-);
+)engine = innodb;
 
 create table tipoEquipamento (
-	cod_tipo_equipamento int primary key auto_increment,
-    descricao varchar(30)
-);
+	cod_tipo_equipamento int auto_increment,
+    descricao varchar(30),
+    constraint pktipoequipamento primary key (cod_tipo_equipamento)
+)engine = innodb;
 
 create table equipamento (
-	etiqueta char(8) primary key,
+	etiqueta char(15),
     marca varchar(20),
     descricao varchar(30),
     dataAquisicao Date,
+    constraint pkequipamento primary key (etiqueta),
     -- será foreign key:
     cod_tipo_equipamento int,
     cod_departamento int
-);
+)engine = innodb;
 
 create table avaria (
-	cod_avaria int primary key auto_increment,
+	cod_avaria int auto_increment,
     descricao varchar(30),
     data_avaria Date,
+    constraint pkavaria primary key (cod_avaria),
     -- será foreign key:
-    etiqueta int,
+    etiqueta char(15),
     cod_funcionario int
-);
+)engine = innodb;
 
 create table intervencao (
-	cod_intervencao int primary key auto_increment,
+	cod_intervencao int auto_increment,
     descricao varchar(30),
     data_intervencao Date,
+    constraint pkintervencao primary key (cod_intervencao),
     -- será foreign key:
     cod_avaria int,
     cod_funcionario int
-);
+)engine = innodb;
 
 -- ------------------------------------------------------------
 -- DDL: 2- Adicionando as constraints que definem as foreign keys:
 
 alter table funcionario 
-	add constraint fk_cod_departamento 
+	add constraint fk_funcionario_departamento
 	foreign key (cod_departamento) 
-    references departamento (cod_departamento);
+    references departamento (cod_departamento)
+    on delete restrict;
     
 alter table equipamento
-	add constraint fk_cod_tipo_equipamento
+	add constraint fk_equipamento_tipo_equipamento
     foreign key (cod_tipo_equipamento)
     references tipoEquipamento (cod_tipo_equipamento);
-
+    
 alter table equipamento
-    add constraint fk_cod_departamento
+	add constraint fk_equipamento_departamento
     foreign key (cod_departamento)
     references departamento (cod_departamento);
     
 alter table avaria
-	add constraint fk_etiqueta
+	add constraint fk_avaria_equipamento
     foreign key (etiqueta)
     references equipamento (etiqueta);
     
 alter table avaria
-	add constraint fk_cod_funcionario
+	add constraint fk_avaria_funcionario
     foreign key (cod_funcionario)
     references funcionario (cod_funcionario);
     
 alter table intervencao
-	add constraint fk_cod_avaria
+	add constraint fk_intervencao_avaria
     foreign key (cod_avaria)
     references avaria (cod_avaria);
     
 alter table intervencao
-	add constraint fk_cod_funcionario
+	add constraint fk_intervencao_funcionario
     foreign key (cod_funcionario)
     references funcionario (cod_funcionario);
     
@@ -94,18 +102,18 @@ alter table funcionario
 -- DDL: 4- Apagar e adicionar a constraint foreign key de avaria
 
 alter table avaria
-	drop foreign key fk_etiqueta;
+	drop foreign key fk_avaria_equipamento;
     
 alter table avaria
-	drop foreign key fk_cod_funcionario;
-
+	drop foreign key fk_avaria_funcionario;
+    
 alter table avaria
-	add constraint fk_etiqueta
+	add constraint fk_avaria_equipamento
     foreign key (etiqueta)
     references equipamento (etiqueta);
     
 alter table avaria
-	add constraint fk_cod_funcionario
+	add constraint fk_avaria_funcionario
     foreign key (cod_funcionario)
     references funcionario (cod_funcionario);
     
@@ -117,5 +125,131 @@ alter table avaria
 alter table funcionario
 	add column sexo enum ('F', 'M'); -- não há diferença entre 'F' e 'f'
 
--- DDL: 7 - Apagar a tabela departamento com a opção restrict
+-- DDL: 7 - Tentar apagar a tabela departamento com a opção restrict para ver que dá erro
+
+-- insert into departamento (cod_departamento, descricao) value (101, "Contabilidade");
+-- insert into funcionario (nome, cod_departamento) value ("jorge", 101);
+-- delete from departamento where cod_departamento = 101; -- DÁ ERRO!
+-- delete from funcionario where cod_funcionario = 1;
+-- delete from departamento where cod_departamento = 101; -- DÁ CERTO!
+
+-- ----------------- DML --------------------
+-- DML: 8- Inserir dados em todas as tabelas
+
+insert into departamento 
+	(cod_departamento, descricao)
+	values
+    (101, "Contabilidade"),
+    (102, "Comercial"),
+    (103, "Recursos Humanos"),
+    (104, "Informática"),
+    (105, "Gerência");
+    
+insert into funcionario
+	(nome, cod_departamento)
+    values
+    ("Cláudia Pinto", 101),
+    ("Paulo Mendes", 101),
+    ("Ricardo Freitas", 102),
+    ("Catarina Rios", 105),
+    ("Ana Souza", 103);
+    
+insert into tipoEquipamento 
+	(descricao)
+    values
+    ("Computador"),
+    ("Impressora"),
+    ("Fax"),
+    ("Monitor"),
+    ("Fotocopiadora");
+    
+insert into equipamento
+	(etiqueta, marca, descricao, dataAquisicao, cod_tipo_equipamento, cod_departamento)
+    values
+    ("PC001CTB", "HP", "Computador DualCore 200GB", '2011-02-03', 1, 101),
+    ("PC002CTB", "HP", "Computador DualCore 200GB", '2011-02-03', 1, 101),
+    ("PC001INF", "HP", "Computador DualCore 500GB", '2011-02-03', 1, 104),
+    ("PC002INF", "HP", "Computador DualCore 500GB", '2011-02-03', 1, 104),
+    ("IMP001INF", "HP", "Impressora HP Laserjet", '2011-02-03', 2, 104);
+    
+insert into avaria
+	(descricao, data_avaria, etiqueta, cod_funcionario)
+    values
+    ("O computador não liga", '2011-02-03', "PC001CTB", 2),
+    ("Trocar o tonner", '2011-02-03', "IMP001INF", 3),
+    ("Não imprime nada colorido", '2011-02-03', "IMP001INF", 4),
+    ("Computador com vírus", '2011-02-03', "PC002INF", 3),
+    ("Monitor piscando", '2011-02-03', "PC001CTB", 5);
+    
+insert into intervencao
+	(descricao, data_intervencao, cod_avaria, cod_funcionario)
+    values
+    ("Trocada a placa mãe", '2011-02-05', 1, 2),
+    ("Trocado o tonner", '2011-02-05', 2, 3),
+    ("Trocado o tonner", '2011-02-05', 3, 4),
+    ("Feito o factory reset", '2011-02-05', 4, 3),
+    ("Trocado o cabo de vídeo", '2011-02-05', 5, 5);
+    
+-- DML: 9- Criar cópias das tabelas utilizando create com select
+
+create table departamentocopia select * from departamento;
+create table funcionariocopia select * from funcionario;
+create table tipoequipamentocopia select * from tipoequipamento;
+create table equipamentocopia select * from equipamento;
+create table avariacopia select * from avaria;
+create table intervencaocopia select * from intervencao;
+
+-- DML: 10- Deletar todos os funcionários
+
+-- delete from intervencao;
+-- delete from avaria;
+-- delete from funcionario;
+
+-- DML: 11- Deletar equipamentos "informática"
+
+-- delete from equipamento where cod_departamento = 104;
+
+-- DML: 12- Atualizar equipamentos para "samsung"
+
+update equipamento
+	set marca = "samsung";
+
+-- DML: 13- todos ricardos -> departamento 101
+
+update funcionario
+	set cod_departamento = 101
+    where nome like "Ricardo";
+
+-- DML: 14- todos ricardos -> departamento informática
+
+update funcionario
+	set cod_departamento = 104
+    where nome like "Ricardo";
+
+-- DML: 15- selecionar todos os funcionários
+
+select * from funcionario;
+
+-- DML: 16- selecionar funcionários do departamento comercial
+
+select * from funcionario where cod_departamento = 102;
+
+-- DML: 17- selecionar equipamentos da categoria computador
+
+select * from equipamento where cod_tipo_equipamento = 1;
+
+-- DML: 18- selecionar o nome de todos os funcionarios responsáveis pelo cadastro das avarias
+
+select nome from funcionario
+	right join avaria
+    on funcionario.cod_funcionario = avaria.cod_funcionario;
+    
+
+
+
+
+
+
+
+
 
