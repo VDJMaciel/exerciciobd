@@ -127,11 +127,11 @@ alter table funcionario
 
 -- DDL: 7 - Tentar apagar a tabela departamento com a opção restrict para ver que dá erro
 
--- insert into departamento (cod_departamento, descricao) value (101, "Contabilidade");
--- insert into funcionario (nome, cod_departamento) value ("jorge", 101);
--- delete from departamento where cod_departamento = 101; -- DÁ ERRO!
--- delete from funcionario where cod_funcionario = 1;
--- delete from departamento where cod_departamento = 101; -- DÁ CERTO!
+ insert into departamento (cod_departamento, descricao) value (101, "Contabilidade");
+ insert into funcionario (nome, cod_departamento) value ("jorge", 101);
+ delete from departamento where cod_departamento = 101; -- DÁ ERRO!
+ delete from funcionario where cod_funcionario = 1;
+ delete from departamento where cod_departamento = 101; -- DÁ CERTO!
 
 -- ----------------- DML --------------------
 -- DML: 8- Inserir dados em todas as tabelas
@@ -152,7 +152,8 @@ insert into funcionario
     ("Paulo Mendes", 101, 'M'),
     ("Ricardo Freitas", 102, 'm'),
     ("Catarina Rios", 105,'F'),
-    ("Ana Souza", 103, 'f');
+    ("Ana Souza", 103, 'f'),
+    ("Fernanda Freire", 103, 'f');    
     
 insert into tipoEquipamento 
 	(descricao)
@@ -184,7 +185,7 @@ insert into avaria
 insert into intervencao
 	(descricao, data_intervencao, cod_avaria, cod_funcionario)
     values
-    ("Trocada a placa mãe", '2011-02-05', 1, 2),
+    ("Trocada a placa mãe", '2011-02-05', 1, 1),
     ("Trocado o tonner", '2011-02-05', 2, 3),
     ("Trocado o tonner", '2011-02-05', 3, 4),
     ("Feito o factory reset", '2011-02-05', 4, 3),
@@ -201,13 +202,13 @@ create table intervencaocopia select * from intervencao;
 
 -- DML: 10- Deletar todos os funcionários
 
--- delete from intervencao;
--- delete from avaria;
--- delete from funcionario;
+ delete from intervencao;
+ delete from avaria;
+ delete from funcionario;
 
 -- DML: 11- Deletar equipamentos "informática"
 
--- delete from equipamento where cod_departamento = 104;
+ delete from equipamento where cod_departamento = 104;
 
 -- DML: 12- Atualizar equipamentos para "samsung"
 
@@ -240,9 +241,57 @@ select * from equipamento where cod_tipo_equipamento = 1;
 
 -- DML: 18- selecionar o nome de todos os funcionarios responsáveis pelo cadastro das avarias
 
-select funcionario.nome, avaria.cod_avaria from funcionario
-	right join avaria
-    on funcionario.cod_funcionario = avaria.cod_funcionario;
+select funcionario.nome, avaria.cod_avaria 
+from funcionario right join avaria
+on funcionario.cod_funcionario = avaria.cod_funcionario;
+    
+-- PARTE 2 DA ATIVIDADE
+-- ---------------------------------------------------------------------------------------------------------
+-- 1: Quantidade de funcionários por departamento, exibindo o nome do departamento e, ao lado, a quantidade
+
+select departamento.descricao as departamento, count(*) as quantidade
+from departamento join funcionario
+where funcionario.cod_departamento = departamento.cod_departamento
+group by departamento.cod_departamento;
+
+-- 2: Adicionar salario à funcionario
+
+alter table funcionario
+add column salario float;
+
+-- 3: Mostrar o maior salario, o menor, a soma e a média salarial
+
+select max(salario) as maior, min(salario) as menor, sum(salario) as soma, avg(salario) as media
+from funcionario;
+
+-- 4: Adicionar quatro avarias
+
+insert into avaria
+	(descricao, data_avaria, etiqueta, cod_funcionario)
+    values
+    ("O computador está com virus", '2011-02-03', "PC001CTB", 2),
+    ("Impressora fazendo ruído", '2011-02-03', "IMP001INF", 3),
+    ("Papel atolado", '2011-02-03', "IMP001INF", 4),
+    ("Computador desligando sozinho", '2011-02-03', "PC002INF", 3);
+    
+-- 5: Funcionarios e quantidade de avarias
+
+select funcionario.nome, count(avaria.cod_avaria) as "quantidade de avarias"
+from funcionario left join avaria
+on funcionario.cod_funcionario = avaria.cod_funcionario
+group by funcionario.nome;
+
+-- 6: Mostre as intervenções, seguidas dos nomes dos funcionarios, descrição e data das avarias
+
+select intervencao.cod_intervencao as "Intervenção", 
+		funcionario.nome as "Funcionário responsável", 
+		intervencao.descricao as "Descrição da Intervenção", 
+		avaria.data_avaria as "Data da avaria" 
+from intervencao left join funcionario
+on intervencao.cod_funcionario = funcionario.cod_funcionario
+left join avaria
+on intervencao.cod_avaria = avaria.cod_avaria;
+
     
 
 
