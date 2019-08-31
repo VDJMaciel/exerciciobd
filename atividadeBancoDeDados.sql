@@ -146,13 +146,13 @@ insert into departamento
     (105, "Gerência");
     
 insert into funcionario
-	(nome, cod_departamento)
+	(nome, cod_departamento, sexo)
     values
-    ("Cláudia Pinto", 101),
-    ("Paulo Mendes", 101),
-    ("Ricardo Freitas", 102),
-    ("Catarina Rios", 105),
-    ("Ana Souza", 103);
+    ("Cláudia Pinto", 101, 'f'),
+    ("Paulo Mendes", 101, 'M'),
+    ("Ricardo Freitas", 102, 'm'),
+    ("Catarina Rios", 105,'F'),
+    ("Ana Souza", 103, 'f');
     
 insert into tipoEquipamento 
 	(descricao)
@@ -240,7 +240,7 @@ select * from equipamento where cod_tipo_equipamento = 1;
 
 -- DML: 18- selecionar o nome de todos os funcionarios responsáveis pelo cadastro das avarias
 
-select nome from funcionario
+select funcionario.nome, avaria.cod_avaria from funcionario
 	right join avaria
     on funcionario.cod_funcionario = avaria.cod_funcionario;
     
