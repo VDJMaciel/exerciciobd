@@ -292,6 +292,41 @@ on intervencao.cod_funcionario = funcionario.cod_funcionario
 left join avaria
 on intervencao.cod_avaria = avaria.cod_avaria;
 
+-- 7: Isolar o ano de uma data
+
+select extract(year from equipamento.dataAquisicao) from equipamento;
+
+-- 8: Usar agrupamento para:
+-- 8.1: Mostrar quantidade de equipamentos adquiridos por ano
+
+select extract(year from equipamento.dataAquisicao) as "Ano", 
+		count(*) as "Equipamentos Adquiridos"
+from equipamento
+group by ano;
+
+-- 8.2: Mostrar quantidade de equipamentos para cada descrição do equipamento
+
+select equipamento.descricao, count(*) as "Quantidade"
+from equipamento
+group by equipamento.descricao; 
+
+-- 8.3: 
+
+
+-- 9: Selecionar nome dos funcionarios que recebem o maior salario
+select funcionario.nome
+from funcionario
+where funcionario.salario = (select max(funcionario.salario) from funcionario);
+
+-- 10: Selecionar com o in as avarias nos equipamentos do tipo computador
+select * from avaria;
+
+select * from avaria
+where "PC" in avaria.etiqueta
+
+
+
+
     
 
 
