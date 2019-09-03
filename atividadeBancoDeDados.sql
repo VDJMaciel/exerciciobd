@@ -233,11 +233,17 @@ select * from funcionario;
 
 -- DML: 16- selecionar funcionários do departamento comercial
 
-select * from funcionario where cod_departamento = 102;
-
+select funcionario.* from funcionario 
+	join departamento
+    on funcionario.cod_departamento = departamento.cod_departamento
+    where departamento.descricao = "Comercial";
+    
 -- DML: 17- selecionar equipamentos da categoria computador
 
-select * from equipamento where cod_tipo_equipamento = 1;
+select equipamento.* from 
+	equipamento join tipoEquipamento
+    on equipamento.cod_tipo_equipamento = tipoEquipamento.cod_tipo_equipamento
+    where tipoEquipamento.descricao = "Computador";
 
 -- DML: 18- selecionar o nome de todos os funcionarios responsáveis pelo cadastro das avarias
 
@@ -319,10 +325,13 @@ from funcionario
 where funcionario.salario = (select max(funcionario.salario) from funcionario);
 
 -- 10: Selecionar com o in as avarias nos equipamentos do tipo computador
-select * from avaria;
-
-select * from avaria
-where "PC" in avaria.etiqueta
+select avaria.*
+	from avaria join equipamento
+    on avaria.etiqueta = equipamento.etiqueta
+    join tipoEquipamento
+    on equipamento.cod_tipo_equipamento = tipoEquipamento.cod_tipo_equipamento
+    where tipoEquipamento.descricao = "Computador"
+;
 
 
 
