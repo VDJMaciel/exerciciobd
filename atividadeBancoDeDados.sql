@@ -237,7 +237,9 @@ select funcionario.* from funcionario
 	join departamento
     on funcionario.cod_departamento = departamento.cod_departamento
     where departamento.descricao = "Comercial";
-    
+
+Algebra Relacional: Pi CodFun, Nome(Sigma<CodDepartamento=102> (Funcionario lxl Funcionario.CodDepartamento = Departamento.CodDepartamento Departamento))
+
 -- DML: 17- selecionar equipamentos da categoria computador
 
 select equipamento.* from 
@@ -245,12 +247,18 @@ select equipamento.* from
     on equipamento.cod_tipo_equipamento = tipoEquipamento.cod_tipo_equipamento
     where tipoEquipamento.descricao = "Computador";
 
+Algebra Relacional: Pi Etiqueta, Marca, Descrição, dataAquisição, CodDepartamento (Sigma<CodTipoEquipamento=1> (Equipamento |X| Equipamento.CodTipoEquipamento = TipoEquipamento.CodTipoEquipamento TipoEquipamento))
+
+
 -- DML: 18- selecionar o nome de todos os funcionarios responsáveis pelo cadastro das avarias
 
 select funcionario.nome, avaria.cod_avaria 
 from funcionario right join avaria
 on funcionario.cod_funcionario = avaria.cod_funcionario;
-    
+
+Algebra Relacional: Pi CodAvaria, Descrição, Data, Etiqueta, Nome.Funcionario (Avaria |X| Avaria.CodFuncionario = Funcionario.CodFuncionario Funcionario)
+	
+	
 -- PARTE 2 DA ATIVIDADE
 -- ---------------------------------------------------------------------------------------------------------
 -- 1: Quantidade de funcionários por departamento, exibindo o nome do departamento e, ao lado, a quantidade
@@ -287,7 +295,7 @@ from funcionario left join avaria
 on funcionario.cod_funcionario = avaria.cod_funcionario
 group by funcionario.nome;
 
--- 6: Mostre as intervenções, seguidas dos nomes dos funcionarios, descrição e data das avarias
+-- 6: Mostre as intervenções, seguidas dos nomes dos funcionarios, descrição e data das avarias (Rever)
 
 select intervencao.cod_intervencao as "Intervenção", 
 		funcionario.nome as "Funcionário responsável", 
@@ -297,6 +305,11 @@ from intervencao left join funcionario
 on intervencao.cod_funcionario = funcionario.cod_funcionario
 left join avaria
 on intervencao.cod_avaria = avaria.cod_avaria;
+
+Algebra Relacional: Pi CodIntervenção, DescriçãoIntervenção, DataIntervenção, 
+			NomeFuncionario, DescriçãoAvaria, DataAvaria, (Intervenção lXl Intervenção.CodAvaria 
+			= Avaria.CodAvaria (Avaria lXl Avaria.CodFuncionario = Funcionario.CodFuncionario Funcionario)) 
+
 
 -- 7: Isolar o ano de uma data
 
