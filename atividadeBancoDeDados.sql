@@ -63,7 +63,7 @@ alter table funcionario
 	foreign key (cod_departamento) 
     references departamento (cod_departamento)
     on delete restrict;
-    
+
 alter table equipamento
 	add constraint fk_equipamento_tipo_equipamento
     foreign key (cod_tipo_equipamento)
@@ -303,21 +303,30 @@ on intervencao.cod_avaria = avaria.cod_avaria;
 select extract(year from equipamento.dataAquisicao) from equipamento;
 
 -- 8: Usar agrupamento para:
--- 8.1: Mostrar quantidade de equipamentos adquiridos por ano
+-- 8.1: Usando a função de data pesquisada acima, mostre, por ano, a quantidade de equipamentos adquiridos.
 
 select extract(year from equipamento.dataAquisicao) as "Ano", 
 		count(*) as "Equipamentos Adquiridos"
 from equipamento
 group by ano;
 
--- 8.2: Mostrar quantidade de equipamentos para cada descrição do equipamento
+-- 8.2: Mostre, pela descrição do tipo de equipamento, a quantidade de equipamentos.
 
-select equipamento.descricao, count(*) as "Quantidade"
-from equipamento
-group by equipamento.descricao; 
+select tipoequipamento.descricao, count(*) as "Quantidade"
+from equipamento join tipoequipamento
+on equipamento.cod_tipo_equipamento = tipoequipamento.cod_tipo_equipamento
+group by tipoequipamento.descricao; 
 
--- 8.3: 
 
+-- 8.3: Mostre, por ano e pela descrição do tipo de equipamento (juntando os dois 
+-- comandos anteriores), a quantidade de equipamentos adquiridos.
+
+select extract(year from equipamento.dataAquisicao) as ano,
+		tipoequipamento.descricao, 
+        count(*) as "Quantidade"
+from equipamento join tipoequipamento
+on equipamento.cod_tipo_equipamento = tipoequipamento.cod_tipo_equipamento
+group by ano, tipoequipamento.descricao;
 
 -- 9: Selecionar nome dos funcionarios que recebem o maior salario
 select funcionario.nome
@@ -326,12 +335,92 @@ where funcionario.salario = (select max(funcionario.salario) from funcionario);
 
 -- 10: Selecionar com o in as avarias nos equipamentos do tipo computador
 select avaria.*
-	from avaria join equipamento
-    on avaria.etiqueta = equipamento.etiqueta
-    join tipoEquipamento
-    on equipamento.cod_tipo_equipamento = tipoEquipamento.cod_tipo_equipamento
-    where tipoEquipamento.descricao = "Computador"
-;
+from avaria join equipamento
+on avaria.etiqueta = equipamento.etiqueta
+join tipoEquipamento
+on equipamento.cod_tipo_equipamento = tipoEquipamento.cod_tipo_equipamento
+where tipoEquipamento.descricao in ("Computador");
+
+-- 11: Mostre os funcionários que não estão relacionados a Intervenções (usando EXISTS)
+
+select * from funcionario
+where not exists 
+(select * from intervencao 
+where intervencao.cod_funcionario = funcionario.cod_funcionario);
+        
+-- 12: Mostre as avarias que possuíram intervenções (primeiro usando EXISTS, depois usando IN e terceiro, usando JOIN)
+
+select * from avaria
+where exists
+(select * from intervencao where intervencao.cod_avaria = avaria.cod_avaria);
+
+select * from avaria
+where avaria.cod_avaria in (select intervencao.cod_avaria from intervencao);
+
+select avaria.* from avaria
+join intervencao
+on avaria.cod_avaria = intervencao.cod_avaria;
+
+-- 13: Mostre a soma dos salários, agrupando por descrição de departamento.
+
+select departamento.descricao as "Departamento", sum(funcionario.salario) as "Soma dos Salários" from funcionario
+join departamento
+on departamento.cod_departamento = funcionario.cod_departamento
+group by departamento.descricao;
+
+-- 14: Mostre a média salarial de cada departamento por ordem decrescente.
+
+select funcionario.cod_departamento, avg(funcionario.salario) as media from funcionario
+group by funcionario.cod_departamento
+order by media desc;
+
+-- 15: Mostre os nomes dos empregados que recebem salario maior que todos os salários do departamento Informática.
+
+select funcionario.nome from funcionario
+where funcionario.salario > 
+	(
+		select sum(funcionario.salario) 
+        from funcionario join departamento
+        on funcionario.cod_departamento = departamento.cod_departamento
+        where departamento.descricao = "Informática"
+    );
+
+-- 16: Faça um cross join entre Departamento e Funcionário.
+
+select * from departamento
+cross join funcionario;
+
+-- 17: Faça um cross join entre Departamento e Funcionário, fazendo a equivalência entre as chaves (primária e estrangeira).
+
+select * from departamento
+cross join funcionario
+on departamento.cod_departamento = funcionario.cod_departamento;
+
+-- 18: Cadastre algum funcionário sem departamento. Em seguida, exclua os funcionários do 
+-- departamento 104 e faça um outer Join (left e right) entre departamento e funcionário.
+
+insert into funcionario
+(funcionario.nome, funcionario.salario, funcionario.sexo)
+values
+("William", 300, "M");
+
+delete from funcionario
+where funcionario.cod_departamento = 104;
+
+-- Observação: o MySQL não suporta full outer join, então fizemos um left e um right, e depois union entre os dois, que traz o mesmo efeito
+select * 
+from departamento left join funcionario
+on departamento.cod_departamento = funcionario.cod_departamento
+union all
+select * 
+from departamento right join funcionario
+on departamento.cod_departamento = funcionario.cod_departamento;
+
+-- 19: Traga o nome do funcionário e o nome do departamento a que pertence, usando o inner join (Álgebra).
+
+select funcionario.nome, departamento.descricao as "Departamento que ele pertence"
+from funcionario join departamento
+on funcionario.cod_departamento = departamento.cod_departamento;
 
 
 
