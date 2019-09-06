@@ -381,6 +381,8 @@ join departamento
 on departamento.cod_departamento = funcionario.cod_departamento
 group by departamento.descricao;
 
+Algebra Relacional: Pi CodIntervenção, DescriçãoIntervenção, DataIntervenção, CodFuncionario, CodAvaria, DescriçãoAvaria, DataAvaria, (Avaria |X| Avaria.CodAvaria = Intervenção.CodAvaria  Intervenção)
+
 -- 14: Mostre a média salarial de cada departamento por ordem decrescente.
 
 select funcionario.cod_departamento, avg(funcionario.salario) as media from funcionario
@@ -435,7 +437,7 @@ select funcionario.nome, departamento.descricao as "Departamento que ele pertenc
 from funcionario join departamento
 on funcionario.cod_departamento = departamento.cod_departamento;
 
-
+Algebra Relacional: Pi NomeFuncionario, NomeDepartamento (Funcionario |X| Funcionario.CodDepartamento = Departamento.CodDepartamento Departamento)
 
 
     
